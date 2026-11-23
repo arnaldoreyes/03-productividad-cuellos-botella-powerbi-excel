@@ -1,0 +1,46 @@
+# ---- Datos crudos: NO se versionan (pesan 120 MB) ----
+01_raw/entrada/*
+!01_raw/entrada/.gitkeep
+
+# ---- Secretos y configuración local ----
+.env
+*.local
+*.secret
+AGENTS.md
+
+# ---- Power BI ----
+# El .pbix del tablero SÍ se versiona: es el entregable y quien revise el repo
+# debe poder abrirlo. Solo se ignora lo temporal.
+*.pbix~
+*.pbix.lock
+.pbix/
+# Cache y respaldos automáticos de Power BI Desktop
+*.pbids.lock
+~$*.pbix
+
+# ---- Office ----
+~$*.xlsx
+~$*.xls
+~$*.docx
+~$*.pptx
+*.tmp
+
+# ---- Sistema ----
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# ---- Python (por si se usa un helper de limpieza) ----
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# ---- VS Code ----
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# ---- Logs y temporales ----
+*.log
+*.bak
