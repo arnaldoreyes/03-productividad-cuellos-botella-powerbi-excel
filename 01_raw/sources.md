@@ -11,26 +11,27 @@
 | Licencia | CC BY 4.0 |
 | DOI | 10.24432/C51S6D |
 | Donado | 2020-08-02 |
-| Registros | 1.197 filas · 15 columnas |
+| Fecha de descarga | 2026-11-23 |
+| Archivo local | `01_raw/entrada/garments_worker_productivity.csv` (excluido de Git vía `.gitignore`) |
+| Tamaño | 94.933 bytes |
+| Registros | 1.197 filas de datos · 15 columnas (1.198 líneas incluyendo encabezado) |
+| SHA-256 | `763FFCDD39B7F7F360243C2AF8F89ED733E8B5F9E511EFEB0C886B83E1B76866` |
 | Uso | Cualquiera, con atribución |
 
-**Estado de la descarga:** **PENDIENTE.** El intento del 2026-11-10 falló por error de
-conexión (`Error inesperado de recepción`). Al arrancar el Proyecto 3:
-
-1. Descargar el `.zip` (92,9 KB) al navegador o con `Invoke-WebRequest`.
-2. Descomprimir en `01_raw/entrada/` → debe quedar `garments_worker_productivity.csv`.
-3. Calcular el SHA-256 y **agregarlo a este archivo** antes de cargar.
+**Estado de la descarga:** **VERIFICADA (2026-11-23).** Archivo descargado desde la URL
+oficial de UCI, descomprimido en `01_raw/entrada/garments_worker_productivity.csv` y
+verificado con `Get-FileHash` (SHA-256) y conteo exacto de filas/columnas en PowerShell.
 
 ## Columnas y trampas
 
 | Columna | Tipo | Qué es | Trampa |
 |---|---|---|---|
-| `date` | fecha | Fecha del registro | Viene en formato `MM-DD-YYYY` (mes primero). Peligro de confundir con `DD-MM-YYYY` |
-| `quarter` | categoría | El mes dividido en 4 cuartos | **No es el trimestre del año.** Es una cuarta parte del mes. No confundir con Q1–Q4 |
-| `department` | categoría | Departamento (`sewing`, `finishing`) | `finishing` tiene ~1/4 de los registros de `sewing`: el tablero debe mostrar el volumen, no solo el promedio |
+| `date` | fecha | Fecha del registro | Viene en formato estadounidense `M/D/YYYY` con barras (ej. `1/1/2015`, mes primero). Peligro de confundir con `D/M/YYYY` |
+| `quarter` | categoría | El mes dividido en cuartos | **No es el trimestre del año.** Es una fracción del mes (ej. `Quarter1`; valores distintos a verificar en staging). No confundir con Q1–Q4 |
+| `department` | categoría | Departamento (`sewing`, `finishing`) | Ya en las primeras 5 filas aparecen anomalías reales: typo `sweing` y espacio final en `finishing `. `finishing` además tiene menor volumen que `sewing`: el tablero debe mostrar el volumen, no solo el promedio |
 | `day` | categoría | Día de la semana | — |
 | `team` | entero | Número de equipo | Hay equipos que desaparecen del dataset a mitad de periodo: no asumir panel balanceado |
-| `no_of_workers` | entero | Operarios del equipo | Cambia entre registros del mismo equipo; no es constante |
+| `no_of_workers` | decimal | Operarios del equipo | Cambia entre registros del mismo equipo y **admite medios turnos / decimales** (ej. `30.5` en las filas 3 y 4) |
 | `no_of_style_change` | entero | Cambios de estilo del día | — |
 | `targeted_productivity` | decimal | Objetivo fijado por la autoridad | Varía por equipo y día; la brecha se calcula contra **este** valor, no contra un objetivo único |
 | `smv` | decimal | Standard Minute Value: tiempo asignado a la tarea | Es el tiempo estándar; sin él no se puede convertir productividad a unidades |
