@@ -21,7 +21,7 @@ El análisis está dividido en dos vistas conectadas mediante navegación intera
 ![Resumen Ejecutivo](04_presentation/capturas/Resumen%20Ejecutivo.png)
 
 ### Página 2 — Cuellos de Botella
-![Cuellos de Botella](04_presentation/capturas/Cuellos%20de%20botella.png)
+![Cuellos de Botella](04_presentation/capturas/Cuellos%20de%20Botella.png)
 
 ---
 
