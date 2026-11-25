@@ -1,86 +1,55 @@
-# Productividad y cuellos de botella — capacidad en una línea de producción
+# Productividad y Cuellos de Botella en Planta Textil (Power BI + Excel)
 
-Análisis de la productividad diaria de equipos de una fábrica de confección: cuánto de la
-capacidad se pierde, dónde se pierde y qué variable explica mejor la caída (tiempo muerto,
-horas extra, cambios de estilo o trabajo en proceso).
-
-**Stack:** Power BI Desktop (tablero) · Excel (escenario de capacidad)
-**Perfil:** Analista de Datos de Operaciones / BI
-
-> **Estado:** pendiente. Se abre al cerrar el Proyecto 2.
-> El dataset está definido y verificado; **la descarga está pendiente** (ver
-> [`01_raw/sources.md`](01_raw/sources.md)).
+Tablero ejecutivo y operativo para diagnosticar el cumplimiento de metas de producción, identificar los equipos que frenan la planta y cuantificar el impacto de horas extra, tiempo inactivo y cambios de estilo.
 
 ---
 
-## El problema de negocio
+## 1. Pregunta de Negocio
 
-Una fábrica de confección entrega pedidos contra un objetivo de productividad por equipo
-y por día. Cuando el equipo no llega, la causa puede ser:
+> **¿Cumplimos la meta de producción y qué factores operativos están frenando a los equipos rezagados?**
 
-- **tiempo muerto** (la línea se paró y hubo operarios sin trabajo),
-- **horas extra** (se trabajó de más para compensar, con costo adicional),
-- **cambios de estilo** (reconfigurar la línea cuesta tiempo productivo),
-- **trabajo en proceso acumulado** (cuello de botella aguas arriba).
+El análisis está dividido en dos vistas conectadas mediante navegación interactiva y segmentadores sincronizados (**Mes**, **Departamento** y **Equipo**):
 
-Cada causa tiene una acción distinta y un costo distinto. El análisis tiene que separar
-el efecto de cada una, no solo reportar "la productividad fue 73%".
+1. **Resumen Ejecutivo:** Visión gerencial del cumplimiento global, evolución diaria frente a la meta, comparativa entre departamentos (`Costura` vs. `Acabado`) y ranking de desempeño por equipo.
+2. **Cuellos de Botella:** Diagnóstico operativo por equipo cruzando productividad real contra horas extra, tiempo inactivo, cambios de estilo y trabajo en proceso (WIP).
 
-## Preguntas de negocio
+---
 
-| # | Pregunta | Indicador | Estado |
-|---|---|---|---|
-| 01 | ¿Cuál es la brecha entre productividad objetivo y real, por departamento y equipo? | Objetivo − real (puntos porcentuales) | Pendiente |
-| 02 | ¿Cuánto de la caída explica el tiempo muerto? | Horas de línea perdidas / horas disponibles | Pendiente |
-| 03 | ¿Las horas extra compensan la caída o la agravan? | Productividad real vs. minutos extra | Pendiente |
-| 04 | ¿Qué departamento es el cuello de botella real? | Menor productividad y mayor tiempo muerto relativo | Pendiente |
-| 05 | ¿El trabajo en proceso acumulado anticipa una caída de productividad? | Correlación WIP vs. productividad | Pendiente |
-| 06 | ¿Cuánta capacidad se recuperaría reduciendo el tiempo muerto a la mediana? | Escenario en Excel | Pendiente |
+## 2. Vista Previa del Tablero
 
-## Modelo de datos
+### Página 1 — Resumen Ejecutivo
+![Resumen Ejecutivo](04_presentation/capturas/Resumen%20Ejecutivo.png)
 
-```
-hecho_produccion   (fecha, departamento, equipo, smv, wip, overtime_min,
-                    idle_time_min, idle_men, incentivo, objetivo, real)
-dim_equipo         (team → número de operarios)
-dim_departamento   (department)
-dim_tiempo         (fecha → día de semana, trimestre del mes, mes)
-```
+### Página 2 — Cuellos de Botella
+![Cuellos de Botella](04_presentation/capturas/Cuellos%20de%20botella.png)
 
-## Pipeline
+---
 
-```
-01_raw/          Descarga UCI + DDL + carga
-02_staging/      Tipado, nulos de WIP, normalización de fechas y categorías
-03_modeling/     Hechos, dimensiones y vistas vw_*
-04_presentation/ Tablero Power BI (2 páginas) + libro Excel de escenario de capacidad
-05_validation/   Cuadre del tablero contra SQL + checklist
-```
+## 3. Hallazgos Principales (Trimestre Completo)
 
-**Particularidad de este proyecto:** es el único donde Excel y Power BI se complementan
-de verdad. Power BI cuenta la historia (dónde y cuándo se pierde la capacidad); Excel
-responde la pregunta de decisión (cuánta capacidad se recupera si se ataca el tiempo
-muerto). Eso es exactamente lo que se espera de un analista de operaciones.
+* **Cumplimiento global ajustado:** La planta cerró con una **Productividad Real de 73.5%** frente a una **Meta de 73.0%** (**+0.5%** de brecha y **100.7%** de cumplimiento), acumulando **91,121 horas extra**, **874 minutos inactivos**, **180 cambios de estilo** y un **WIP promedio de 1,190**.
+* **6 de 12 equipos están bajo meta:** Aunque el promedio global es positivo, la mitad de los equipos presenta brecha negativa. Los casos críticos son **Equipo 07 (-4.6%)**, **Equipo 06 (-4.6%)** y **Equipo 08 (-3.4%)**.
+* **El tiempo inactivo está altamente concentrado:** Solo dos equipos (**Equipo 08** con **313 min** y **Equipo 07** con **287 min**) concentran el **68.6%** de todo el tiempo inactivo de la planta (`600` de `874` min).
+* **Más horas extra no garantizan mayor productividad:** En el gráfico de dispersión, **Equipo 07**, **Equipo 08**, **Equipo 09** y **Equipo 10** operan por encima del promedio de horas extra pero permanecen por debajo de la meta. En contraste, **Equipo 12** alcanza **77.9%** de productividad con apenas **5,475 horas extra**, **0 minutos inactivos** y **0 cambios de estilo**.
+* **Los cambios de estilo golpean a los equipos rezagados:** **Equipo 08 (29 cambios)**, **Equipo 11 (25)** y **Equipo 07 (20)** encabezan la concentración de cambios de estilo y todos cierran en terreno negativo.
 
-## Limitaciones
+---
 
-- **1.197 registros de 3 meses.** Es un dataset pequeño: sirve para el método, no para
-  generalizar. Se declara.
-- **Productividad en escala 0–1**, no en unidades producidas. No se puede convertir a
-  piezas sin el tiempo estándar (`smv`) de cada estilo, que no viene en el dataset.
-- **Datos de una sola fábrica y un solo periodo.** No hay comparación entre plantas.
-- **WIP tiene nulos.** No imputar sin documentarlo.
+## 4. Recomendaciones Operativas
 
-## Fuente
+1. **Intervenir primero en Equipo 08 y Equipo 07:** Auditar las causas raíz de sus paros (`600 min` combinados) y reducir la frecuencia de cambios de estilo en sus líneas (`49` cambios combinados) antes de seguir asignando horas extra.
+2. **Revisar la asignación de horas extra en Equipos 09 y 10:** Ambos consumen casi `7,900` horas extra cada uno sin cerrar la brecha (`-2.4%` y `-1.9%`), con tiempo inactivo mínimo (`0` y `16 min`). El foco debe estar en balanceo de línea y control de WIP (`1,528` en Equipo 10).
+3. **Documentar las prácticas de Equipo 01 y Equipo 12:** Usar a **Equipo 01** (`82.1%` real, `+7.4%` brecha) y **Equipo 12** (alta eficiencia con baja dependencia de horas extra y cero paros) como referencia interna para estandarizar turnos.
 
-| Campo | Detalle |
-|---|---|
-| Dataset | Productivity Prediction of Garment Employees |
-| Enlace | <https://archive.ics.uci.edu/dataset/597/productivity+prediction+of+garment+employees> |
-| Institución | UCI Machine Learning Repository |
-| Licencia | CC BY 4.0 |
-| Registros | 1.197 filas, 15 columnas |
-| Agradecimiento | Abdullah Al Imran, Md Shamsur Rahim, Tanvir Ahmed (2021) |
+---
 
-El detalle de columnas y la trampa de cada una está en
-[`01_raw/sources.md`](01_raw/sources.md).
+## 5. Arquitectura y Herramientas
+
+* **Herramientas:** Power BI Desktop, Microsoft Excel.
+* **Modelo de Datos:** Esquema en estrella con tabla de hechos (`hecho_productividad`) relacionada (`1:*`, dirección única) con tres dimensiones: `dim_tiempo`, `dim_departamento` y `dim_equipo`.
+* **Medidas DAX (`_Medidas`):** `Productividad Real`, `Productividad Meta`, `Brecha de Productividad`, `% Cumplimiento de Meta`, `% Turnos Bajo Meta`, `Horas Extra`, `Tiempo Inactivo (min)`, `Cambios de Estilo` y `WIP Promedio`.
+* **Estructura del Proyecto:**
+  * `01_raw/` — Dataset original.
+  * `02_staging/` — Limpieza y preparación en Excel.
+  * `03_model/` — Tablas dimensionales y de hechos.
+  * `04_presentation/` — Archivo `.pbix` y carpeta `capturas/`.
